@@ -653,11 +653,23 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify({
                         datetime: datetimeFormatted
                     })
                 });
+                
+                // Check if response is ok
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                }
+                
+                // Check content type
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Server returned non-JSON response. Please check if the server is running correctly.');
+                }
                 
                 const data = await response.json();
                 
@@ -675,7 +687,17 @@
                     throw new Error(data.error || 'Prediction failed');
                 }
             } catch (error) {
-                document.getElementById('error').textContent = '❌ Error: ' + error.message;
+                console.error('Prediction error:', error);
+                let errorMessage = error.message;
+                
+                // Provide more helpful error messages
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Unable to connect to server. Please make sure the application is running.';
+                } else if (error.message.includes('JSON')) {
+                    errorMessage = 'Server error: Received invalid response. Please try again.';
+                }
+                
+                document.getElementById('error').textContent = '❌ ' + errorMessage;
                 document.getElementById('error').style.display = 'block';
             } finally {
                 document.getElementById('loading').style.display = 'none';

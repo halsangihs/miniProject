@@ -10,19 +10,6 @@ import requests
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend communication
 
-# Error handlers
-@app.errorhandler(404)
-def not_found(error):
-    return jsonify({'success': False, 'error': 'Endpoint not found'}), 404
-
-@app.errorhandler(500)
-def internal_error(error):
-    return jsonify({'success': False, 'error': 'Internal server error'}), 500
-
-@app.errorhandler(Exception)
-def handle_exception(error):
-    return jsonify({'success': False, 'error': str(error)}), 500
-
 # Load models and encoders at startup
 print("Loading models...")
 with open("final_rf_model.pkl", "rb") as f:
